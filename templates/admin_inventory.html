@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container" style="max-width: 600px; margin: 40px auto;">
+    <h1>Tag Inventory</h1>
+    <p>Generate unique QR tag records for products before sending them for printing.</p>
+    <a href="{{ url_for('admin_activity_history') }}" class="inventory-reactivate-btn">
+        View Activity History
+    </a>
+    <section class="inventory-summary">
+        <div class="inventory-summary-card">
+            <span class="inventory-summary-label">Total Tags</span>
+            <strong>{{ total_tags }}</strong>
+            <span class="inventory-summary-note">Generated inventory</span>
+        </div>
+
+        <div class="inventory-summary-card">
+            <span class="inventory-summary-label">Available</span>
+            <strong>{{ available_tags }}</strong>
+            <span class="inventory-summary-note">Ready for activation</span>
+        </div>
+
+        <div class="inventory-summary-card">
+            <span class="inventory-summary-label">Activated</span>
+            <strong>{{ activated_tags }}</strong>
+            <span class="inventory-summary-note">Assigned to owners</span>
+        </div>
+    </section>
+
+
+    <form method="POST" action="{{ url_for('generate_inventory_tags') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div style="margin-bottom: 18px;">
+            <label for="tag_type">Product Type</label>
+            <select id="tag_type" name="tag_type" required
+                style="display:block; width:100%; padding:10px; margin-top:6px;">
+                <option value="elderly">Elderly Wristband</option>
+                <option value="child">Children's Wristband</option>
+                <option value="luggage">Luggage & Bag Tag</option>
+                <option value="everyday">QR Keychain / Everyday Tag</option>
+            </select>
+        </div>
+
+        <div style="margin-bottom: 22px;">
+            <label for="quantity">Number of Tags (1–100)</label>
+            <input type="number" id="quantity" name="quantity" min="1" max="100" value="5" required
+                style="display:block; width:100%; padding:10px; margin-top:6px;">
+        </div>
+
+        <button type="submit">Generate Inventory Tags</button>
+    </form>
+
+    <div style="margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap;">
+        <a href="{{ url_for('export_inventory_tags') }}">
+            Export Inventory CSV
+        </a>
+
+        <a href="{{ url_for('print_inventory_tags') }}">
+            Download QR Print PDF
+        </a>
+    </div>
+
+
+    <section class="inventory-list">
+        <h2>Generated Tags</h2>
+        <p>Track all generated QR tags and their current status.</p>
+
+        {% if tags %}
+
+        <div class="inventory-controls">
+            <input type="search" id="inventory-search" placeholder="Search by tag ID or product type..."
+                aria-label="Search inventory tags">
+
+            <select id="inventory-status-filter" aria-label="Filter by status">
+                <option value="all">All statuses</option>
+                <option value="available">Available</option>
+                <option value="activated">Activated</option>
+                <option value="deactivated">Deactivated</option>
+                <option value="review">Needs review</option>
+            </select>
+        </div>
+
+        <div class="inventory-table-wrapper">
+            <table class="inventory-table">
+                <thead>
+                    <tr>
+                        <th>Tag ID</th>
+                        <th>Product Type</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+
+                <tbody>
+                    {% for tag in tags %}
+                    <tr>
+                        <td>#{{ tag.id }}</td>
+
+                        <td>
+                            {% if tag.tag_type == "elderly" %}
+                            Elderly Wristband
+                            {% elif tag.tag_type == "child" %}
+                            Children's Wristband
+                            {% elif tag.tag_type == "luggage" %}
+                            Luggage &amp; Bag Tag
+                            {% elif tag.tag_type == "everyday" %}
+                            QR Keychain / Everyday Tag
+                            {% else %}
+                            {{ tag.tag_type|title }}
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if tag.owner_id is not none and tag.is_active %}
+                            <span class="inventory-status status-active">Activated</span>
+                            {% elif tag.owner_id is not none %}
+                            <span class="inventory-status status-inactive">Deactivated</span>
+                            {% elif tag.is_active %}
+                            <span class="inventory-status status-inactive">Needs review</span>
+                            {% else %}
+                            <span class="inventory-status status-available">Available</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if tag.owner_id is not none and tag.is_active %}
+                            <form method="POST" action="{{ url_for('admin_deactivate_tag', tag_id=tag.id) }}"
+                                onsubmit="return confirm('Deactivate this tag?');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="inventory-deactivate-btn">
+                                    Deactivate
+                                </button>
+                            </form>
+
+                            {% elif tag.owner_id is not none and not tag.is_active %}
+                            <form method="POST" action="{{ url_for('admin_reactivate_tag', tag_id=tag.id) }}"
+                                onsubmit="return confirm('Reactivate this tag?');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="inventory-reactivate-btn">
+                                    Reactivate
+                                </button>
+                            </form>
+
+                            {% else %}
+                            <span class="inventory-action-note">Not activated</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+
+            </table>
+        </div>
+        {% else %}
+        <div class="inventory-empty">
+            <h3>No tags generated yet</h3>
+            <p>Generate your first batch above to see tags listed here.</p>
+        </div>
+        {% endif %}
+    </section>
+
+    <form method="POST" action="{{ url_for('admin_logout') }}" style="margin-top: 24px;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit">Admin Logout</button>
+    </form>
+
+</div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const search = document.getElementById("inventory-search");
+        const filter = document.getElementById("inventory-status-filter");
+        const rows = document.querySelectorAll(".inventory-table tbody tr");
+
+        if (!search || !filter) return;
+
+        function filterInventory() {
+            const query = search.value.trim().toLowerCase();
+            const selectedStatus = filter.value;
+
+            rows.forEach(function (row) {
+                const text = row.textContent.toLowerCase();
+                const status = row.querySelector(".inventory-status");
+                const statusText = status ? status.textContent.trim().toLowerCase() : "";
+
+                const matchesSearch = text.includes(query);
+                const matchesStatus =
+                    selectedStatus === "all" ||
+                    (selectedStatus === "available" && statusText === "available") ||
+                    (selectedStatus === "activated" && statusText === "activated") ||
+                    (selectedStatus === "deactivated" && statusText === "deactivated") ||
+                    (selectedStatus === "review" && statusText === "needs review");
+
+                row.hidden = !(matchesSearch && matchesStatus);
+            });
+        }
+
+        search.addEventListener("input", filterInventory);
+        filter.addEventListener("change", filterInventory);
+    });
+</script>
+
+
+{% endblock %}

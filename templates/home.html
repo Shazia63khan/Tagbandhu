@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Tagbandhu | Every Tag Has a Connection{% endblock %}
+
+{% block content %}
+
+<section class="hero">
+    <div class="hero-content">
+        <p class="eyebrow">SMART TAGS. SIMPLE CONNECTIONS.</p>
+
+        <h1>Lost something?<br>
+            <span>Find your way back.</span>
+        </h1>
+
+        <p class="hero-description">
+            Tagbandhu helps you reconnect with loved ones and recover lost belongings using simple QR tags. Your
+            personal contact details stay private while finders can reach you through a secure contact option.
+        </p>
+
+        <div class="hero-buttons">
+            <a href="/products" class="primary-button">Explore Our Tags</a>
+            <a href="#how-it-works" class="secondary-button">How It Works</a>
+        </div>
+
+        <div class="hero-features">
+            <div>
+                <strong>01</strong>
+                <span>Scan the QR</span>
+            </div>
+            <div>
+                <strong>02</strong>
+                <span>View Tag Details</span>
+            </div>
+            <div>
+                <strong>03</strong>
+                <span>Contact Safely</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="hero-visual">
+        <div class="tag-card">
+            <div class="tag-top">
+                <span class="tag-brand">Tagbandhu</span>
+                <span class="tag-status">SMART TAG</span>
+            </div>
+
+            <div class="qr-placeholder">
+
+                <div class="qr-pattern">
+                    <span></span><span></span><span></span><span></span><span></span>
+                    <span></span><span></span><span></span><span></span><span></span>
+                    <span></span><span></span><span></span><span></span><span></span>
+                    <span></span><span></span><span></span><span></span><span></span>
+                    <span></span><span></span><span></span><span></span><span></span>
+                </div>
+
+            </div>
+
+            <h3>Scan. Connect. Return.</h3>
+            <p>A little tag can make a big difference.</p>
+        </div>
+
+        <div class="floating-note">
+            <span class="check-icon">✓</span>
+            <div>
+                <strong>Privacy matters</strong>
+                <p>Your phone number stays private</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="categories">
+    <div class="section-heading">
+        <p class="eyebrow">OUR PRODUCTS</p>
+        <h2>One small tag. More peace of mind.</h2>
+        <p>Choose a tag designed for the things you care about.</p>
+    </div>
+
+    <div class="category-grid">
+        <div class="category-card">
+            <div class="category-icon wristband-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M12 21s-8-4.5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6.5-8 11-8 11Z" />
+                    <path d="M9 12h6M12 9v6" />
+                </svg>
+            </div>
+            <h3>Safety Wristbands</h3>
+            <p>
+                QR wristbands for children and elderly people,
+                helping a finder contact their family when they
+                get separated or need assistance.
+            </p>
+            <a href="/products">Explore wristbands →</a>
+        </div>
+
+        <div class="category-card">
+            <div class="category-icon luggage-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <rect x="4" y="7" width="16" height="14" rx="2" />
+                    <path d="M9 7V5a3 3 0 0 1 6 0v2M8 11v6M16 11v6" />
+                    <path d="M12 10v4" />
+                </svg>
+            </div>
+            <h3>Everyday & Luggage Tags</h3>
+            <p>
+                Attach QR tags to bags, suitcases, and keychains
+                so someone who finds your belongings can reach
+                you without exposing your private contact details.
+            </p>
+            <a href="/products">Explore everyday tags →</a>
+        </div>
+    </div>
+</section>
+
+<section class="how-section" id="how-it-works">
+    <div class="section-heading">
+        <p class="eyebrow">HOW IT WORKS</p>
+        <h2>Three simple steps</h2>
+    </div>
+
+    <div class="steps-grid">
+        <div class="step-card">
+            <span class="step-number">01</span>
+            <h3>Get Your Tag</h3>
+            <p>Choose a wristband, keychain, or luggage tag that suits your needs.</p>
+        </div>
+
+        <div class="step-card">
+            <span class="step-number">02</span>
+            <h3>Activate It</h3>
+            <p>Activate your purchased tag from your account dashboard.</p>
+        </div>
+
+        <div class="step-card">
+            <span class="step-number">03</span>
+            <h3>Reconnect Safely</h3>
+            <p>A finder scans the QR and uses the available contact option.</p>
+        </div>
+    </div>
+</section>
+
+<section class="closing-section">
+    <h2>Give your belongings a way back.</h2>
+    <p>Simple identification. Thoughtful privacy. Better connections.</p>
+    <a href="/products" class="primary-button">Discover Tagbandhu</a>
+</section>
+
+{% endblock %}

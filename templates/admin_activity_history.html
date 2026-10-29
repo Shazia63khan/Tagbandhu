@@ -1,0 +1,82 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="activity-history-container">
+
+    <div class="activity-history-header">
+        <div>
+            <h1>Tag Activity History</h1>
+            <p>Track tag activation, deactivation and reactivation events.</p>
+        </div>
+
+        <a href="{{ url_for('admin_inventory') }}"
+           class="activity-history-back">
+            &larr; Back to Inventory
+        </a>
+    </div>
+
+    {% if activities %}
+    <div class="activity-history-table-wrap">
+        <table class="activity-history-table">
+            <thead>
+                <tr>
+                    <th>Tag ID</th>
+                    <th>Action</th>
+                    <th>Details</th>
+                    <th>Date &amp; Time (IST)</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for activity in activities %}
+                <tr>
+                    <td class="activity-tag-id">
+                        #{{ activity.tag_id }}
+                    </td>
+
+                    <td>
+                        {% if activity.action == "deactivated" %}
+                            <span class="activity-badge activity-badge-deactivated">
+                                Deactivated
+                            </span>
+                        {% elif activity.action == "reactivated" %}
+                            <span class="activity-badge activity-badge-reactivated">
+                                Reactivated
+                            </span>
+                        {% elif activity.action == "activated" %}
+                            <span class="activity-badge activity-badge-activated">
+                                Activated
+                            </span>
+                        {% else %}
+                            <span class="activity-badge">
+                                {{ activity.action|title }}
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <td class="activity-details">
+                        {{ activity.details or "—" }}
+                    </td>
+
+                    <td class="activity-time">
+                        {% if activity.created_at %}
+                            {{ activity.created_at.strftime("%d %b %Y, %I:%M:%S %p") }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+    <div class="activity-history-empty">
+        <p>No activity recorded yet.</p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

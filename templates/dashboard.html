@@ -1,0 +1,471 @@
+{% extends "base.html" %}
+
+{% block title %}My Dashboard | Tagbandhu{% endblock %}
+
+{% block content %}
+
+<section class="dashboard-hero">
+    <div>
+        <p class="eyebrow">YOUR TAGBANDHU SPACE</p>
+        <h1>Welcome, {{ name }}! </h1>
+        <p>Manage your account and keep your belongings connected.</p>
+    </div>
+
+    <form action="/logout" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="logout-button">Logout</button>
+    </form>
+</section>
+
+<section class="dashboard-content">
+
+
+    <div class="dashboard-stats">
+
+        <article class="dashboard-stat-card dashboard-stat-clickable" role="button" tabindex="0"
+            data-scroll-target="my-tags" aria-label="Go to My Tags">
+            <div class="stat-icon stat-icon-total">#</div>
+            <div>
+                <p>Total Tags</p>
+                <h3>{{ total_tags }}</h3>
+                <span>Registered to your account</span>
+            </div>
+        </article>
+
+        <article class="dashboard-stat-card dashboard-stat-clickable" role="button" tabindex="0"
+            data-scroll-target="my-tags" aria-label="Go to My Tags">
+            <div class="stat-icon stat-icon-active">✓</div>
+            <div>
+                <p>Active Tags</p>
+                <h3>{{ active_tags }}</h3>
+                <span>Ready to be scanned</span>
+            </div>
+        </article>
+
+        <article class="dashboard-stat-card dashboard-stat-clickable" role="button" tabindex="0"
+            data-scroll-target="received-messages" aria-label="Go to Received Messages">
+            <div class="stat-icon stat-icon-messages">✉</div>
+            <div>
+                <p>Unread Messages</p>
+                <h3>{{ unread_count }}</h3>
+                <span>Waiting for your attention</span>
+            </div>
+        </article>
+
+    </div>
+
+
+    <div class="dashboard-heading">
+        <h2>Your Tag Dashboard</h2>
+        <p>Activate your purchased tag and manage your registered tags.</p>
+    </div>
+
+    <div class="dashboard-card activate-tag-card">
+
+        <div class="activate-tag-header">
+            <div class="activate-tag-icon">+</div>
+            <div>
+                <h3>Activate Your Purchased Tag</h3>
+                <p>Connect your Tagbandhu product to your account.</p>
+            </div>
+        </div>
+
+
+        <p class="activate-tag-description">
+            Enter the unique tag code printed on your Tagbandhu product.
+        </p>
+
+        <form action="{{ url_for('activate_tag') }}" method="POST" class="activate-tag-form">
+
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="activate-tag-input-group">
+                <label for="tag_code">Your Tag Code</label>
+                <input type="text" id="tag_code" name="tag_code" placeholder="Enter your tag code" autocomplete="off"
+                    required>
+            </div>
+
+            <button type="submit" class="activate-tag-button">
+                Activate Tag <span aria-hidden="true">→</span>
+            </button>
+
+        </form>
+
+        <div class="activation-help">
+            <h4>What happens next?</h4>
+
+            <div class="activation-help-items">
+
+                <div class="activation-help-item">
+                    <span>01</span>
+                    <div>
+                        <strong>Activate your tag</strong>
+                        <p>Enter the unique code printed on your product.</p>
+                    </div>
+                </div>
+
+                <div class="activation-help-item">
+                    <span>02</span>
+                    <div>
+                        <strong>Check your dashboard</strong>
+                        <p>Your activated tag will appear in My Tags.</p>
+                    </div>
+                </div>
+
+                <div class="activation-help-item">
+                    <span>03</span>
+                    <div>
+                        <strong>Keep your QR ready</strong>
+                        <p>Open your tag's QR code to view or download it.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="activate-tag-note">
+            <span aria-hidden="true">ⓘ</span>
+            Make sure the code matches the one printed on your product.
+        </div>
+
+    </div>
+
+
+
+
+    <div class="my-tags-section" id="my-tags">
+
+        <h2>My Tags</h2>
+        <p class="my-tags-subtitle">
+            Manage your registered tags and access their QR codes.
+        </p>
+
+        <div class="tag-search-wrapper">
+            <label for="tag-search">Search your tags</label>
+            <input type="search" id="tag-search" placeholder="Search by tag type, ID, or status..." autocomplete="off">
+            <p id="tag-search-count" aria-live="polite"></p>
+        </div>
+
+        {% if tags %}
+        <div class="dashboard-grid my-tags-grid">
+            {% for tag in tags %}
+            <article class="dashboard-card tag-search-item my-tag-card">
+
+                <div class="my-tag-card-header">
+                    <div class="dashboard-icon dashboard-icon-create">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 13L13 20L3 10V3H10L20 13Z" />
+                            <circle cx="7.5" cy="7.5" r="1" />
+                            <path d="M15 5V11M12 8H18" />
+                        </svg>
+                    </div>
+
+                    <span
+                        class="tag-status-badge {% if tag.is_active %}tag-status-active{% else %}tag-status-inactive{% endif %}">
+                        {% if tag.is_active %}
+                        Active
+                        {% else %}
+                        Inactive
+                        {% endif %}
+                    </span>
+                </div>
+
+                <h3>
+                    {% if tag.tag_type == "elderly" %}
+                    Elderly Wristband
+                    {% elif tag.tag_type == "child" %}
+                    Child Safety Tag
+                    {% elif tag.tag_type == "luggage" %}
+                    Bag &amp; Luggage Tag
+                    {% else %}
+                    Everyday Item Tag
+                    {% endif %}
+                </h3>
+
+                <div class="tag-id-row">
+                    <span>TAG ID</span>
+                    <code>{{ tag.tag_code[:8] }}</code>
+                </div>
+
+
+                <div class="my-tag-card-footer">
+                    <a href="{{ url_for('tag_qr', tag_code=tag.tag_code) }}" class="dashboard-link">
+                        View / Download QR <span aria-hidden="true">→</span>
+                    </a>
+
+
+                    {% if tag.is_active %}
+                    <form method="POST" action="{{ url_for('customer_deactivate_tag', tag_id=tag.id) }}"
+                        onsubmit="return confirm('Are you sure you want to deactivate this tag?');"
+                        style="margin-top: 12px;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="customer-deactivate-btn">
+                            Deactivate Tag
+                        </button>
+                    </form>
+                    {% else %}
+                    <form method="POST" action="{{ url_for('customer_reactivate_tag', tag_id=tag.id) }}"
+                        onsubmit="return confirm('Do you want to reactivate this tag?');" style="margin-top: 12px;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="customer-reactivate-btn">
+                            Reactivate Tag
+                        </button>
+                    </form>
+                    {% endif %}
+
+                </div>
+
+
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="my-tags-empty">
+            <h3>No tags yet</h3>
+            <p>You haven't activated any tags yet. Activate your purchased tag to see it here.</p>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <hr>
+
+
+    <div class="my-tags-section received-messages-section" id="received-messages">
+
+        <h2>Received Messages</h2>
+        <p class="messages-subtitle">
+            Messages sent by people who scan your QR tags.
+        </p>
+
+        <div class="message-search-wrapper">
+            <label for="message-search">Search received messages</label>
+            <input type="search" id="message-search" placeholder="Search by name, email, phone, tag ID or message..."
+                autocomplete="off">
+            <p id="message-search-count" aria-live="polite"></p>
+        </div>
+
+        <div class="message-filter-controls">
+            <button type="button" class="message-filter-btn active" data-filter="all">
+                All Messages
+            </button>
+            <button type="button" class="message-filter-btn" data-filter="unread">
+                Unread
+            </button>
+            <button type="button" class="message-filter-btn" data-filter="read">
+                Read
+            </button>
+        </div>
+
+        {% if received_messages %}
+        <div class="dashboard-grid messages-grid">
+
+            {% for msg in received_messages %}
+            <article
+                class="dashboard-card message-card message-search-item {% if not msg.is_read %}unread-message{% endif %}">
+
+                <div class="message-card-header">
+                    <div class="message-sender-info">
+                        <h3>{{ msg.sender_name }}</h3>
+
+                        <span class="message-status {% if msg.is_read %}status-read{% else %}status-unread{% endif %}">
+                            {% if msg.is_read %}Read{% else %}Unread{% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="message-details">
+                    <p>
+                        <strong>From</strong>
+                        <span>{{ msg.sender_email }}</span>
+                    </p>
+
+                    <p>
+                        <strong>Related tag</strong>
+                        <span>
+                            {% if msg.tag.tag_type == "elderly" %}
+                            Elderly Wristband
+                            {% elif msg.tag.tag_type == "child" %}
+                            Children's Wristband
+                            {% elif msg.tag.tag_type == "luggage" %}
+                            Luggage Tag
+                            {% else %}
+                            Everyday Item Tag
+                            {% endif %}
+                        </span>
+                    </p>
+
+                    <p>
+                        <strong>Finder's Phone</strong>
+                        <span>{{ msg.sender_phone or 'Not provided' }}</span>
+                    </p>
+
+                    <p>
+                        <strong>Tag ID</strong>
+                        <code>{{ msg.tag.tag_code[:8] }}</code>
+                    </p>
+                </div>
+
+                <div class="message-content">
+                    <p class="message-content-label">Message</p>
+                    <p>{{ msg.message }}</p>
+                </div>
+
+                <p class="message-timestamp">
+                    <strong>Received:</strong>
+                    {% if msg.created_at %}
+                    {{ (msg.created_at + timedelta(hours=5, minutes=30)).strftime("%d-%m-%Y %I:%M:%S %p") }}
+                    {% else %}
+                    Date unavailable
+                    {% endif %}
+                </p>
+
+                {% if not msg.is_read %}
+                <form action="{{ url_for('mark_message_read', message_id=msg.id) }}" method="POST"
+                    class="mark-read-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="mark-read-button">
+                        Mark as Read <span aria-hidden="true">→</span>
+                    </button>
+                </form>
+                {% endif %}
+
+            </article>
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+        <div class="dashboard-card empty-messages">
+            <h3>No messages yet</h3>
+            <p>Messages will appear here when someone contacts you through an active QR tag.</p>
+        </div>
+        {% endif %}
+
+    </div>
+
+</section>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById("tag-search");
+        const tagCards = document.querySelectorAll(".tag-search-item");
+        const resultCount = document.getElementById("tag-search-count");
+
+        if (!searchInput) return;
+
+        function filterTags() {
+            const query = searchInput.value.trim().toLowerCase();
+            let visibleCount = 0;
+
+            tagCards.forEach(function (card) {
+                const matches = card.textContent.toLowerCase().includes(query);
+                card.style.display = matches ? "" : "none";
+
+                if (matches) visibleCount++;
+            });
+
+            if (resultCount) {
+                resultCount.textContent = query
+                    ? visibleCount + (visibleCount === 1 ? " tag found" : " tags found")
+                    : "";
+            }
+        }
+
+        searchInput.addEventListener("input", filterTags);
+    });
+</script>
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById("message-search");
+        const messageCards = document.querySelectorAll(".message-search-item");
+        const resultCount = document.getElementById("message-search-count");
+        const filterButtons = document.querySelectorAll(".message-filter-btn");
+
+        let currentFilter = "all";
+
+        function filterMessages() {
+            const query = searchInput.value.trim().toLowerCase();
+            let visibleCount = 0;
+
+            messageCards.forEach(function (card) {
+                const matchesSearch = card.textContent.toLowerCase().includes(query);
+                const isUnread = card.classList.contains("unread-message");
+
+                const matchesFilter =
+                    currentFilter === "all" ||
+                    (currentFilter === "unread" && isUnread) ||
+                    (currentFilter === "read" && !isUnread);
+
+                const shouldShow = matchesSearch && matchesFilter;
+                card.style.display = shouldShow ? "" : "none";
+
+                if (shouldShow) {
+                    visibleCount++;
+                }
+            });
+
+            if (resultCount) {
+                resultCount.textContent =
+                    query || currentFilter !== "all"
+                        ? visibleCount + (visibleCount === 1
+                            ? " message found"
+                            : " messages found")
+                        : "";
+            }
+        }
+
+        searchInput.addEventListener("input", filterMessages);
+
+        filterButtons.forEach(function (button) {
+            button.addEventListener("click", function () {
+                currentFilter = button.dataset.filter;
+
+                filterButtons.forEach(function (item) {
+                    item.classList.toggle("active", item === button);
+                });
+
+                filterMessages();
+            });
+        });
+    });
+</script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const summaryCards = document.querySelectorAll(
+            ".dashboard-stat-clickable"
+        );
+
+        summaryCards.forEach(function (card) {
+            function scrollToSection() {
+                const targetId = card.dataset.scrollTarget;
+                const targetSection = document.getElementById(targetId);
+
+                if (targetSection) {
+                    targetSection.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start"
+                    });
+                }
+            }
+
+            card.addEventListener("click", scrollToSection);
+
+            card.addEventListener("keydown", function (event) {
+                if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    scrollToSection();
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock %}

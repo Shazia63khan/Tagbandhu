@@ -1,0 +1,26 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container" style="max-width: 450px; margin: 50px auto;">
+    <h1>Admin Login</h1>
+    <p>Sign in to manage Tagbandhu inventory.</p>
+
+    <form method="POST" action="{{ url_for('admin_login') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div style="margin-bottom: 20px;">
+            <label for="admin_key">Admin Key</label>
+            <input
+                type="password"
+                id="admin_key"
+                name="admin_key"
+                required
+                autocomplete="current-password"
+                style="display: block; width: 100%; padding: 10px; margin-top: 6px;"
+            >
+        </div>
+
+        <button type="submit">Sign In</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}Found a Tagbandhu Item{% endblock %}
+
+{% block content %}
+<section class="scan-page">
+    {% if tag %}
+    <div class="scan-card">
+        <div class="scan-brand">TAGBANDHU</div>
+
+        <div class="scan-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M20 13L13 20L3 10V3H10L20 13Z" />
+                <circle cx="7.5" cy="7.5" r="1" />
+            </svg>
+        </div>
+
+        <p class="scan-eyebrow">ITEM IDENTIFICATION</p>
+        <h1>You've found a tagged item</h1>
+        <p class="scan-description">
+            Help this item's owner recover it by sending them a message.
+        </p>
+
+        <div class="scan-tag-type">
+            <span>Tag type</span>
+            <strong>
+                {% if tag.tag_type == "elderly" %}
+                Elderly Wristband
+                {% elif tag.tag_type == "child" %}
+                Children's Wristband
+                {% elif tag.tag_type == "luggage" %}
+                Bag &amp; Luggage Tag
+                {% else %}
+                Everyday Item Tag
+                {% endif %}
+            </strong>
+        </div>
+
+        <form class="scan-contact-form" action="{{ url_for('send_contact_message', tag_code=tag.tag_code) }}"
+            method="POST">
+
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="scan-form-group">
+                <label for="sender_name">Your name</label>
+                <input type="text" id="sender_name" name="sender_name" maxlength="100" autocomplete="name"
+                    placeholder="Enter your name" required>
+            </div>
+
+            <div class="scan-form-group">
+                <label for="sender_email">Your email</label>
+                <input type="email" id="sender_email" name="sender_email" maxlength="120" autocomplete="email"
+                    placeholder="Enter your email address" required>
+            </div>
+
+
+            <div class="scan-form-group">
+                <label for="sender_phone">Your mobile number</label>
+                <input type="tel" id="sender_phone" name="sender_phone" pattern="[6-9][0-9]{9}" minlength="10"
+                    maxlength="10" inputmode="numeric" autocomplete="tel-national"
+                    placeholder="Enter 10-digit mobile number" title="Enter a valid 10-digit Indian mobile number"
+                    required>
+            </div>
+
+
+            <div class="scan-form-group">
+                <button type="button" id="send-otp-button" class="scan-submit-button">
+                    Send OTP
+                </button>
+                <p id="otp-status" role="status"></p>
+            </div>
+
+            <div class="scan-form-group" id="otp-section" hidden>
+                <label for="otp">Enter OTP</label>
+                <input type="text" id="otp" inputmode="numeric" pattern="[0-9]{6}" maxlength="6"
+                    placeholder="Enter 6-digit OTP">
+                <button type="button" id="verify-otp-button" class="scan-submit-button">
+                    Verify OTP
+                </button>
+            </div>
+
+
+
+            <div class="scan-form-group">
+                <label for="message">Message to owner</label>
+                <textarea id="message" name="message" maxlength="2000" rows="4" required
+                    placeholder="Tell the owner where you found the item..."></textarea>
+            </div>
+
+            <button class="scan-submit-button" type="submit">
+                Send message to owner
+                <span aria-hidden="true">→</span>
+            </button>
+        </form>
+
+        <p class="scan-privacy-note">
+            Please share only the information needed to help return the item.
+        </p>
+    </div>
+
+    {% else %}
+    <div class="scan-card scan-unavailable">
+        <div class="scan-brand">TAGBANDHU</div>
+        <h1>Tag not available</h1>
+        <p>This tag is invalid, inactive, or has been deactivated.</p>
+        <a href="{{ url_for('home') }}">Back to home</a>
+    </div>
+    {% endif %}
+</section>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.querySelector(".scan-contact-form");
+    const csrfToken = form.querySelector('[name="csrf_token"]').value;
+    const phoneInput = document.getElementById("sender_phone");
+    const otpInput = document.getElementById("otp");
+    const otpSection = document.getElementById("otp-section");
+    const sendButton = document.getElementById("send-otp-button");
+    const verifyButton = document.getElementById("verify-otp-button");
+    const status = document.getElementById("otp-status");
+
+    let verifiedPhone = "";
+
+    sendButton.addEventListener("click", async function () {
+        const phone = phoneInput.value.trim();
+
+        if (!/^[6-9][0-9]{9}$/.test(phone)) {
+            status.textContent = "Enter a valid 10-digit Indian mobile number.";
+            return;
+        }
+
+        sendButton.disabled = true;
+        status.textContent = "Generating test OTP...";
+
+        try {
+            const response = await fetch("/request-otp", {
+                method: "POST",
+                body: new URLSearchParams({
+    phone: phone,
+    csrf_token: csrfToken
+})
+            });
+
+            const data = await response.json();
+            status.textContent = data.message;
+
+            if (response.ok) {
+                otpSection.hidden = false;
+                otpInput.value = "";
+                verifiedPhone = "";
+            }
+        } catch (error) {
+            status.textContent = "Something went wrong. Check that Flask is running.";
+        } finally {
+            sendButton.disabled = false;
+        }
+    });
+
+    verifyButton.addEventListener("click", async function () {
+        const phone = phoneInput.value.trim();
+        const otp = otpInput.value.trim();
+
+        if (!/^[0-9]{6}$/.test(otp)) {
+            status.textContent = "Enter the 6-digit OTP.";
+            return;
+        }
+
+        try {
+            const response = await fetch("/verify-otp", {
+                method: "POST",
+                body: new URLSearchParams({
+    phone: phone,
+    otp: otp,
+    csrf_token: csrfToken
+})
+            });
+
+            const data = await response.json();
+            status.textContent = data.message;
+
+            if (response.ok) {
+                verifiedPhone = phone;
+                status.textContent = "Phone verified successfully!";
+            }
+        } catch (error) {
+            status.textContent = "Verification failed. Check that Flask is running.";
+        }
+    });
+
+    phoneInput.addEventListener("input", function () {
+        if (phoneInput.value.trim() !== verifiedPhone) {
+            verifiedPhone = "";
+        }
+    });
+
+   form.addEventListener("submit", function (event) {
+    if (!verifiedPhone || phoneInput.value.trim() !== verifiedPhone) {
+        event.preventDefault();
+
+        status.textContent =
+            "Please verify your phone number before sending the message.";
+
+        status.style.display = "block";
+        status.style.color = "#b91c1c";
+        status.style.marginTop = "10px";
+
+        status.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+    }
+});
+});
+</script>
+
+{% endblock %}

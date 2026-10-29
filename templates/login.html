@@ -1,0 +1,40 @@
+
+{% extends "base.html" %}
+
+{% block title %}Login | Tagbandhu{% endblock %}
+
+{% block content %}
+
+<section class="auth-section">
+    <div class="auth-card">
+        <a href="/" class="auth-logo">Tag<span>bandhu</span></a>
+
+        <p class="eyebrow">WELCOME BACK</p>
+        <h1>Login to your account</h1>
+        <p class="auth-description">
+            Manage your tags and keep your belongings connected.
+        </p>
+
+        <form action="/login" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <label for="email">Email address</label>
+            <input type="email" id="email" name="email"
+                   placeholder="you@example.com" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password"
+                   placeholder="Enter your password" required>
+
+            <button type="submit" class="auth-button">Login</button>
+        </form>
+
+        <p class="auth-switch">
+            Don't have an account?
+            <a href="/register">Create one</a>
+        </p>
+
+        <a href="/" class="back-link">← Back to home</a>
+    </div>
+</section>
+
+{% endblock %}

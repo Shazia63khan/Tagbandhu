@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Tagbandhu{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <header class="navbar">
+        <a href="/" class="logo">Tag<span>bandhu</span></a>
+
+
+        <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('products') }}">Our Tags</a>
+
+            {% if session.get('user_id') %}
+            <a href="{{ url_for('dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('logout') }}"
+                onclick="event.preventDefault(); document.getElementById('navbar-logout-form').submit();">
+                Logout
+            </a>
+            <form id="navbar-logout-form" action="{{ url_for('logout') }}" method="POST" hidden></form>
+            {% else %}
+            <a href="{{ url_for('login') }}">Login</a>
+            <a href="{{ url_for('register') }}" class="nav-button">Get Started</a>
+            {% endif %}
+        </nav>
+
+    </header>
+
+    <main>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="flash-message">
+            {% for message in messages %}
+            <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>Tagbandhu — Every Tag Has a Connection.</p>
+        <p>Connecting people with their loved ones and helping lost belongings find their way home through simple and
+            smart QR tags.</p>
+    </footer>
+
+</body>
+
+</html>
